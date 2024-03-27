@@ -1,12 +1,19 @@
-use axum::{routing::get, Router};
+use axum::{extract::Path, http::StatusCode, response::IntoResponse, routing::get, Router};
+use serde::{Deserialize, Serialize};
 
-async fn hello_world() -> &'static str {
-    "Hello, Hez! Test dulu ini sebelum connect DB."
+#[derive(Serialize, Deserialize)]
+struct MyRequestType {
+    message: String,
+}
+
+async fn hello_world(Path(id): Path<i32>) -> impl IntoResponse {
+    let string = format!("Hello, world! {}", id);
+    (StatusCode::OK, string)
 }
 
 #[shuttle_runtime::main]
 async fn main() -> shuttle_axum::ShuttleAxum {
-    let router = Router::new().route("/", get(hello_world));
+    let router = Router::new().route("/:id", get(hello_world));
 
     Ok(router.into())
 }
